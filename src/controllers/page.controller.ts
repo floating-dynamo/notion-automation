@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import { PageConfigType } from '../models';
-import { createPageHelper, pageConfigHelper } from '../helpers/page.helper';
+import { BlockType, PageConfigType } from '../models';
+import { addBlockHelper, createPageHelper, pageConfigHelper } from '../helpers/page.helper';
 import { getUserId } from '../utils';
 
 export const getPageConfig = async (req: Request, res: Response) => {
@@ -18,7 +18,6 @@ export const getPageConfig = async (req: Request, res: Response) => {
 
 export const createPage = async (req: Request, res: Response) => {
   const body = req.body;
-  console.log(body);
   if (!body?.type)
     return res.status(400).json({
       message: 'type is required',
@@ -46,5 +45,28 @@ export const createPage = async (req: Request, res: Response) => {
   return res.status(201).json({
     message: 'Page created successfully',
     pageDetails: page,
+  });
+};
+
+export const addBlock = async (req: Request, res: Response) => {
+  const body = req?.body;
+
+  if (!(body?.type && body?.pageId)) {
+    return res.status(400).json({
+      message: 'type and pageId are required',
+    });
+  }
+
+  const { type: blockType, pageId } = body;
+  if (!Object.values(BlockType).includes(blockType)) {
+    return res.status(400).json({
+      message: `The block type must be one of these: ${Object.values(blockType)}`,
+    });
+  }
+
+  const block = await addBlockHelper({ pageId, type: blockType, text: body?.text });
+  res.status(201).json({
+    message: 'Block created successfully',
+    blockDetails: block,
   });
 };

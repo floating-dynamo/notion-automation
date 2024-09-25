@@ -1,5 +1,7 @@
 import { CreatePageParameters } from '@notionhq/client/build/src/api-endpoints';
 import { Client } from '@notionhq/client';
+import { BlockType } from './models';
+import { blockConfigMapper } from './helpers/mappers/block.mapper';
 
 const { NOTION_INTEGRATION_SECRET } = process.env;
 
@@ -28,3 +30,8 @@ export async function getUserId(username: string) {
     console.error('Error fetching users:', error);
   }
 }
+
+export const getBlockConfig = (type: BlockType, content: string) => {
+  const configGenerator = blockConfigMapper[type];
+  return configGenerator ? configGenerator(content) : blockConfigMapper[BlockType.PARAGRAPH](content);
+};
